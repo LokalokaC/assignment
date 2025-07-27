@@ -1,0 +1,12 @@
+pathlib
+requests
+pendulum
+pandas
+numpy
+datetime
+sqlalchemy
+pyarrow
+python-dotenv
+fastparquet
+psycopg2-binary
+apache-airflow-providers-postgres

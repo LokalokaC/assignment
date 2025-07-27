@@ -1,0 +1,28 @@
+{
+  "order_data_1": {
+    "string_cols": ["Region", "OrderID", "CustomerID", "PaymentMethod", "ProductCategory"],
+    "timestamp_cols": ["Timestamp"],
+    "date_cols":["TransactionDate"],
+    "numeric_cols": ["Quantity","TaxAmount"],
+    "duplication_check_cols": ["OrderID"],
+    "missing_check_cols": ["OrderID", "Timestamp"]
+  },
+
+  "order_data_2": {
+    "string_cols": ["ProductName"],
+    "timestamp_cols": ["Timestamp"],
+    "date_cols":["TransactionDate"],
+    "numeric_cols": ["UnitPrice","ShippingCost","TotalAmount"],
+    "duplication_check_cols": ["OrderID"],
+    "missing_check_cols": ["OrderID", "Timestamp"]
+  },
+
+"customer": {
+    "string_cols": ["CustomerID","Activity"],
+    "timestamp_cols": ["Timestamp"],
+    "date_cols":["ActivityDate"],
+    "numeric_cols": [],
+    "duplication_check_cols": [],
+    "missing_check_cols": ["CustomerID", "Timestamp"]
+  }
+}

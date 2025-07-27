@@ -1,0 +1,35 @@
+# Airflow-specific
+logs/
+tmp/
+airflow.cfg
+airflow.db
+airflow-webserver.pid
+webserver_config.py
+*.pid
+
+# DAGS or instruction directories
+instructions/
+dags/__pycache__/
+
+# Python-specific
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.so
+
+# Local secrets / settings
+src/local.py
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# OS / editor / IDE stuff
+.DS_Store
+*.swp
+*.bak
+
+# Git & Docker
+.dockerignore
