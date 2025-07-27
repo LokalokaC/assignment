@@ -25,6 +25,7 @@ src/local.py
 venv/
 ENV/
 env/
+.env
 
 # OS / editor / IDE stuff
 .DS_Store
