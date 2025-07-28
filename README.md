@@ -56,9 +56,9 @@ Required to run shell scripts (e.g., start.sh)
 ```bash
 wsl --install
 ```
-    Then use Ubuntu or another Linux distro inside your terminal.
+Then use Ubuntu or another Linux distro inside your terminal.
 
-    Git Bash – bundled with Git for Windows.
+Git Bash – bundled with Git for Windows.
 
 ### Quick Start Guide
 
