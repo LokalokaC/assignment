@@ -106,6 +106,7 @@ chmod +x start.sh
 - URL: [http://localhost:8080](http://localhost:8080)
 - Username: `airflow`
 - Password: `airflow`
+  > It might take some time for airflow UI to be availble.
 
 ---
 ### Schema Choices
