@@ -1,28 +1,93 @@
-## Table of Contents
+## Project Overview
 
-- [Quick Start Guide](#quick-start-guide)
-- [Pgadmin UI](#pgadmin-ui)
-- [Pgadmin Server](#pgadmin-server)
-- [Airflow UI](#airflow-ui)
-- [Schema Choices](#schema-choices)
-- [Assignments](#assignments)
+This is an ETL project built using Docker, Apache Airflow, and Python. It performs the following tasks:
 
-### Quick Start Guide
+- Ingests raw .csv and .log files from the local environment
+- Normalizes column values and data types
+- Removes duplicate or invalid rows
+- Loads the cleaned data into a PostgreSQL database
+- Supports exploratory analysis and reporting via SQL and Airflow pipelines
 
-1. Clone repository: `git clone https://github.com/LokalokaC/assignment.git`
-2. Navigate to project: `cd assignment`
-3. Run `start.sh`: `bash start.sh` (make sure Docker is running)  
-   > On Windows, use Git Bash or WSL to run shell scripts.
-4. Log into [PgAdmin UI](#pgadmin-ui) → Right Click "Server" and navigate to "Register" → "Server"
-5. Click "Server" → fill in connection and credentials from [Pgadmin Server](#pgadmin-server)
-6. Refer to [Assignments](#assignments) for SQL tasks and examples
-
-
----
 
 > **Note:** PostgreSQL is **not** configured with a persistent volume.  
 > All database content will be **cleared** upon container shutdown.  
 > The Airflow metadata database will be **reinitialized** each time the containers start.
+
+---
+
+## Table of Contents
+
+- [Prerequisites](#prerequisites)  
+- [Quick Start Guide](#quick-start-guide)  
+- [Pgadmin UI](#pgadmin-ui)  
+- [Pgadmin Server](#pgadmin-server)  
+- [Airflow UI](#airflow-ui)  
+- [Schema Choices](#schema-choices)  
+- [Assignments](#assignments)
+
+---
+
+## Prerequisites
+
+To run this project locally, ensure the following tools are installed:
+
+### Docker  
+Used to run Airflow, PostgreSQL, and supporting services in isolated containers.
+
+- Download [Docker Desktop](https://www.docker.com/products/docker-desktop)
+- After installation, confirm installation via:
+
+```bash
+docker --version
+docker-compose --version
+```
+
+### Git
+Used to clone this repository.
+
+- Download [Git](https://git-scm.com/downloads)
+
+### Bash Environment
+Required to run shell scripts (e.g., start.sh)
+
+- On macOS/Linux: Bash is preinstalled.
+- On Windows: Use one of the following:
+    - WSL 2 (recommended) – install via:
+```bash
+wsl --install
+```
+    Then use Ubuntu or another Linux distro inside your terminal.
+
+    Git Bash – bundled with Git for Windows.
+
+### Quick Start Guide
+
+1. Clone repository:
+```bash
+git clone https://github.com/LokalokaC/assignment.git
+```
+
+2. Navigate to project: 
+```bash
+cd assignment
+```
+
+3. Run `start.sh`:
+```bash
+chmod +x start.sh
+./start.sh 
+#(make sure Docker is running)
+```
+   > On Windows, use Git Bash or WSL to run shell scripts.
+
+4. Log into [PgAdmin UI](#pgadmin-ui) → Right Click "Server" and navigate to "Register" → "Server"
+
+5. Click "Server" → fill in connection and credentials from [Pgadmin Server](#pgadmin-server)
+
+6. Refer to [Assignments](#assignments) for SQL tasks and examples
+
+
+---
 
 ### Pgadmin UI
 
