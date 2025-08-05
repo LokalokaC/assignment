@@ -19,7 +19,8 @@ def transform_and_merge(input_paths: list[str]) -> str:
     Returns:
         dict[str, str]: A cleaned and merged .parquet ready for insertion into the Orders table.
     """
-    
+    if not CONFIG_PATH.exists():
+        raise FileNotFoundError(f"Config file {CONFIG_PATH} doesn't exist. Please check environments or paths")
     with open(CONFIG_PATH, "r") as f:
         COLUMN_CONFIGS = json.load(f)
     
@@ -89,12 +90,15 @@ def transform(input_paths: list[str]) -> str:
     Args:
         intput_paths (dict): {file_name: output_path} mapping, retrieved from extract_data()
     Returns:
-        dict[str, str]: A cleaned and merged .parquet ready for insertion into the customer_activities table.
+        dict[str]: A cleaned and merged .parquet ready for insertion into the customer_activities table.
     """
     logging.info("Starting processing customer.log.")
 
+    if not CONFIG_PATH.exists():
+        raise FileNotFoundError(f"Config file {CONFIG_PATH} doesn't exist. Please check environments or paths")
     with open(CONFIG_PATH, "r") as f:
         COLUMN_CONFIGS = json.load(f)
+        
     if not input_paths:
         raise ValueError("No input paths provided to transform().")    
     for input_path_str in input_paths:

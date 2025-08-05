@@ -25,11 +25,11 @@ def extract_data(file_names: list[str]) -> list[str]:
         
         try:
             if file_path.suffix == '.csv':
-                df = pd.read_csv(file_path)
+                df = pd.read_csv(file_path, chunksize=None)
 
             elif file_path.suffix == '.log':
                 columns = ['Timestamp', 'CustomerID', 'Activity']
-                df = pd.read_csv(file_path, sep=' ', header=None, names=columns)
+                df = pd.read_csv(file_path, sep=' ', header=None, names=columns, chunksize=None)
 
                 for col in df.select_dtypes(include=['object']).columns:
                     df[col] = df[col].astype(str).str.replace('[', '', regex=False).str.replace(']', '', regex=False).str.strip()

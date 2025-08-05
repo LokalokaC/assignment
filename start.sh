@@ -37,7 +37,7 @@ docker-compose exec airflow-worker airflow users create \
   --password airflow || true
 
 echo "Run SQL migration..."
-docker-compose exec airflow-worker python3 /opt/airflow/migration.py
+docker-compose exec airflow-worker python3 migration.py
 
 echo "List available dags..."
 docker-compose exec airflow-worker airflow dags list

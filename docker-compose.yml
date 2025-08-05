@@ -42,6 +42,7 @@ services:
     command: scheduler
     environment:
       - PYTHONPATH=/opt/airflow
+      - AIRFLOW_CONN_FS_DEFAULT=file:///opt/airflow/data
       - AIRFLOW__CORE__EXECUTOR=CeleryExecutor
       - AIRFLOW__CELERY__BROKER_URL=redis://redis:6379/0
       - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql+psycopg2://airflow:airflow@postgres/airflow
@@ -69,6 +70,7 @@ services:
       - "8080:8080"
     environment:
       - PYTHONPATH=/opt/airflow
+      - AIRFLOW_CONN_FS_DEFAULT=file:///opt/airflow/data
       - AIRFLOW__CORE__EXECUTOR=CeleryExecutor
       - AIRFLOW__CELERY__BROKER_URL=redis://redis:6379/0
       - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql+psycopg2://airflow:airflow@postgres/airflow
@@ -95,6 +97,7 @@ services:
     command: celery worker
     environment:
       - PYTHONPATH=/opt/airflow
+      - AIRFLOW_CONN_FS_DEFAULT=file:///opt/airflow/data
       - AIRFLOW__CORE__EXECUTOR=CeleryExecutor
       - AIRFLOW__CELERY__BROKER_URL=redis://redis:6379/0
       - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql+psycopg2://airflow:airflow@postgres/airflow

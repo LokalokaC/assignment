@@ -1,6 +1,8 @@
 import logging
 from datetime import datetime, timedelta
 from airflow.decorators import dag, task
+from airflow.sensors.filesystem import FileSensor
+
 @dag(
     dag_id = 'customer_activities_processing_taskflow',
     start_date = datetime(2025,1,1),
@@ -13,7 +15,7 @@ from airflow.decorators import dag, task
         'depends_on_past': False,
         'email_on_failure': False,
         'email_on_retry': False,
-        'retries': 1,
+        'retries': 3,
         'retry_delay': timedelta(minutes=5),
     }
 )
@@ -23,6 +25,13 @@ def customer_data_processing_taskflow(
     SCHEMA: str = 'business',
     POSTGRES_CONN_ID: str = 'postgres_default'
 ):
+    wait_for_logs = FileSensor(
+        task_id='wait_for_logs',
+        filepath='/opt/airflow/data/*.log',
+        poke_interval=60,
+        timeout=600,
+    )
+
     @task()
     def extract_data_task(file_name: list[str]) -> list[str]:
         from src.extract import extract_data
@@ -47,9 +56,9 @@ def customer_data_processing_taskflow(
         
         logging.info("Loading completed successfully.")
 
-    _customer_parquet = extract_data_task(file_name=FILE_NAME)
-    _cleaned_parquet = transform_task(input_path=_customer_parquet)
-    load_task(
+    _customer_parquet = wait_for_logs >> extract_data_task(file_name=FILE_NAME)
+    _cleaned_parquet = _customer_parquet >> transform_task(input_path=_customer_parquet)
+    _cleaned_parquet >> load_task(
         cleaned_parquet=_cleaned_parquet,
         table=TARGET_TABLE_NAME,
         conn_id=POSTGRES_CONN_ID,

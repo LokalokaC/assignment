@@ -53,7 +53,6 @@ def transform_numeric_columns(file_name: str, df: pd.DataFrame, columns: list):
             logging.info(f"Dropped {dropped} rows from {file_name} where all {columns} are 0.")
     return df
 
-
 def check_missing_columns(file_name: str, df:pd.DataFrame, columns: list):  
     for col in columns:
         if col in df.columns:
