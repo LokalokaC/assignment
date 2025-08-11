@@ -3,7 +3,8 @@ import logging
 from airflow.decorators import dag, task
 from airflow.models import Variable
 from airflow.sensors.filesystem import FileSensor
-from airflow.exceptions import AirflowFailException
+from airflow.operators.python import get_current_context
+from airflow.models.param import DagParam
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 WM_KEY = "orders_watermark_utc"
@@ -22,14 +23,15 @@ WM_KEY = "orders_watermark_utc"
         'email_on_retry': False,
         'retries': 3,
         'retry_delay': timedelta(minutes=5),
-    }
+    },
+    params={"LOOKBACK_DAYS": 3},
+    
 )
 def order_data_processing_taskflow(
     FILE_NAMES: list = ['order_data_1.csv','order_data_2.csv'],
     TARGET_TABLE_NAME: str = 'orders',
     SCHEMA: str = 'business',
     POSTGRES_CONN_ID: str = 'postgres_default',
-    LOOKBACK_DAYS: int = 3,
 ):
     wait_for_csvs = FileSensor(
         task_id='wait_for_csvs',
@@ -41,10 +43,12 @@ def order_data_processing_taskflow(
     @task()
     def plan_window_task(**ctx) -> dict:
         from src.utilities import plan_window
+        ctx = get_current_context()
+        lb = int(ctx["params"].get("LOOKBACK_DAYS", 3))
         return plan_window(
             di_start=ctx["data_interval_start"],
             di_end=ctx["data_interval_end"],
-            lookback_days=LOOKBACK_DAYS,
+            lookback_days=lb,
             wm_key=WM_KEY,
         )
 
