@@ -71,7 +71,8 @@ def order_data_processing_taskflow(
         
         logging.info("Loading completed successfully.")
 
-    _order_parquet = wait_for_csvs >> extract_data_task(file_names=FILE_NAMES)
+    _plan = plan_window_task()
+    _order_parquet = [wait_for_csvs, _plan] >> extract_data_task(file_names=FILE_NAMES)
     _merged_parquet = _order_parquet >> transform_task(input_paths=_order_parquet)
     _merged_parquet >> load_task(
          output_path=_merged_parquet,
