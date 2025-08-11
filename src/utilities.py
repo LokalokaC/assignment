@@ -1,6 +1,11 @@
 import logging
 import re
+import time
+import pendulum
+import json
 import pandas as pd
+from datetime import timedelta
+from airflow.models import Variable
 
 def transform_string_columns(file_name: str, df:pd.DataFrame, columns: list):
     for col in columns:
@@ -19,12 +24,25 @@ def transform_timestamp_columns(file_name: str, df: pd.DataFrame, columns: list)
     return df
 
 def transform_date_columns(file_name: str, df: pd.DataFrame, date_cols: list, timestamp_cols: list):
+    timestamp_cols = timestamp_cols or []
     for col in date_cols:
         if col in df.columns:
             df[col] = pd.to_datetime(df[col], errors='coerce').dt.date
+            for time_col in timestamp_cols:
+                if time_col in df.columns:
+                    missing_before = df[col].isna().sum()
+                    df[col] = df[col].fillna(df[time_col].dt.date)
+                    missing_after = df[col].isna().sum()
+                    filled = missing_before - missing_after
+
+                    if filled > 0:
+                        logging.info(f"{file_name}: filled {filled} {col} from {time_col}")
+                                     
+                    if not df[col].isna().any():
+                        break
         else:
             derived = False
-            for time_col in timestamp_cols:
+            for time_col in timestamp_cols:    
                 if time_col in df.columns:
                     df[col] = df[time_col].dt.date
                     logging.info(f"{file_name}: '{col}' not found. Use {time_col} to generate it.")
@@ -120,3 +138,36 @@ class Preprocessor:
         self.set_df(df)
         self.start()
         return self.get_df()
+    
+def log_dq(dataset, run_id, window_start, window_end, rows_read=0, rows_written=0, 
+           rows_deduped=0, rows_quaratined=0, freshness_lag_sec=None, extra=None):
+    payload= {
+        "dataset": dataset, 
+        "run_id": run_id, 
+        "window_start": window_start, 
+        "window_end": window_end, 
+        "rows_read": rows_read, 
+        "rows_written": rows_written, 
+        "rows_deduped": rows_deduped, 
+        "rows_quaratined": rows_quaratined, 
+        "freshness_lag_sec": freshness_lag_sec,
+        "ts": int(time.time()),
+        "extra": extra or {},
+    }
+    logging.info("DQ_SUMMARY=%s", json.dumps(payload))
+    return payload
+
+def plan_window(di_start, di_end, lookback_days: int, wm_key:str) -> dict:
+    di_start = pendulum.instance(di_start) if hasattr(di_start, "tzinfo") else pendulum.parse(str(di_start))
+    di_end = pendulum.instance(di_end) if hasattr(di_end, "tzinfo") else pendulum.parse(str(di_end))
+
+    last_str = Variable.get(wm_key, default_var=di_start.to_datetime_string())
+    last_wm = pendulum.parse(last_str)
+
+    window_start = min(last_wm, di_start) - timedelta(days=lookback_days)
+    window_end = di_end
+
+    return {"Start": window_start.to_datetime_string(), "end": window_end.to_datetime_string()}
+
+def commit_watermark(wm_key: str, window_end: str) -> None:
+    Variable.set(wm_key, window_end)

@@ -25,14 +25,19 @@ def extract_data(file_names: list[str]) -> list[str]:
         
         try:
             if file_path.suffix == '.csv':
-                df = pd.read_csv(file_path, chunksize=None)
+                df = pd.read_csv(file_path)
 
             elif file_path.suffix == '.log':
                 columns = ['Timestamp', 'CustomerID', 'Activity']
-                df = pd.read_csv(file_path, sep=' ', header=None, names=columns, chunksize=None)
+                df = pd.read_csv(file_path, sep=' ', header=None, names=columns)
 
-                for col in df.select_dtypes(include=['object']).columns:
-                    df[col] = df[col].astype(str).str.replace('[', '', regex=False).str.replace(']', '', regex=False).str.strip()
+                obj_cols = df.select_dtypes(include=['object']).columns
+                df[obj_cols] = (
+                    df[obj_cols]
+                    .astype(str)
+                    .replace({'\\[': '', '\\]': ''}, regex=True)
+                    .apply(lambda col: col.str.strip())
+                )
             
             else:
                 logging.error(f"Unsupported file type: {file_path.suffix}")
@@ -49,5 +54,5 @@ def extract_data(file_names: list[str]) -> list[str]:
             
         except Exception as e:
             logging.exception(f"Error reading CSV/LOG file {file_path.name}: {e}")
-            raise    
+            raise
     return output_paths

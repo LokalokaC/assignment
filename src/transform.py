@@ -48,31 +48,28 @@ def transform_and_merge(input_paths: list[str]) -> str:
         processed_dfs[file_name] = processor.run(df)
     if len(processed_dfs) != 2:
         raise ValueError(f"Expected 2 DataFrames but got {len(processed_dfs)}")
-    
-    file_name_1, file_name_2 = processed_dfs.keys()
-    df1, df2 = processed_dfs.values()
-    missing_dates = df2[df2['TransactionDate'].isnull()]
-    if len(missing_dates) > 0:
-        logging.warning(f"{file_name_2} has {len(missing_dates)} missing rows of TransactionDate. Will parse from Timestamp.")
-        df2['TransactionDate'] = df2['TransactionDate'].fillna(df2['Timestamp'].dt.date)
 
+    merged_cf = COLUMN_CONFIGS['merged_order']
+    join_keys = merged_cf.get('join_keys')
+    rename_map = merged_cf.get('rename') or {}
+    columns_to_keep = merged_cf.get('columns_to_keep')
+    df1, df2 = processed_dfs.values()
+
+    if not join_keys or not columns_to_keep:
+        raise ValueError("join_keys and columns_to_keep cannot be empty. Please check column_config.json")
+    
     merged_df = pd.merge(
         df1, 
         df2, 
-        on=['OrderID','TransactionDate'], 
+        on=join_keys, 
         how='inner', 
         suffixes=('_1', '_2')
         )
     if merged_df['OrderID'].isnull().any():
         logging.warning("Some OrderIDs are missing after merge. These rows require further handling or might be dropped.")
 
-    merged_df = merged_df.rename(columns={'Timestamp_1': 'Timestamp'})
-
-    columns_to_keep = ['OrderID','Timestamp','Region','CustomerID'
-                       ,'ProductCategory','ProductName','Quantity','UnitPrice','ShippingCost','TotalAmount'
-                       ,'TaxAmount','PaymentMethod']
+    merged_df = merged_df.rename(columns=rename_map)
     df = merged_df[columns_to_keep]
-
     df = convert_columns_to_snake_case(df)
 
     logging.info(f"Order data has been transformed and merged successfully. Dataset shape: {df.shape}")

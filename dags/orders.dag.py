@@ -1,7 +1,12 @@
 from datetime import datetime, timedelta
 import logging
 from airflow.decorators import dag, task
+from airflow.models import Variable
 from airflow.sensors.filesystem import FileSensor
+from airflow.exceptions import AirflowFailException
+from airflow.providers.postgres.hooks.postgres import PostgresHook
+
+WM_KEY = "orders_watermark_utc"
 
 @dag(
     dag_id='order_data_processing_taskflow',
@@ -23,7 +28,8 @@ def order_data_processing_taskflow(
     FILE_NAMES: list = ['order_data_1.csv','order_data_2.csv'],
     TARGET_TABLE_NAME: str = 'orders',
     SCHEMA: str = 'business',
-    POSTGRES_CONN_ID: str = 'postgres_default'
+    POSTGRES_CONN_ID: str = 'postgres_default',
+    LOOKBACK_DAYS: int = 3,
 ):
     wait_for_csvs = FileSensor(
         task_id='wait_for_csvs',
@@ -31,6 +37,16 @@ def order_data_processing_taskflow(
         poke_interval=60,
         timeout=600,
     )
+
+    @task()
+    def plan_window_task(**ctx) -> dict:
+        from src.utilities import plan_window
+        return plan_window(
+            di_start=ctx["data_interval_start"],
+            di_end=ctx["data_interval_end"],
+            lookback_days=LOOKBACK_DAYS,
+            wm_key=WM_KEY,
+        )
 
     @task()
     def extract_data_task(file_names: list[str]) -> list[str]:

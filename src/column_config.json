@@ -17,12 +17,21 @@
     "missing_check_cols": ["OrderID", "Timestamp"]
   },
 
-"customer": {
+  "customer": {
     "string_cols": ["CustomerID","Activity"],
     "timestamp_cols": ["Timestamp"],
     "date_cols":["ActivityDate"],
     "numeric_cols": [],
     "duplication_check_cols": [],
     "missing_check_cols": ["CustomerID", "Timestamp"]
+  },
+
+  "merged_order": {
+    "join_keys": ["OrderID", "TransactionDate"],
+    "rename": { "Timestamp_1": "Timestamp" },
+    "columns_to_keep": [
+      "OrderID","Timestamp","Region","CustomerID",
+      "ProductCategory","ProductName","Quantity","UnitPrice",
+      "ShippingCost","TotalAmount","TaxAmount","PaymentMethod"]
   }
 }
